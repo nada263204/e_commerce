@@ -1,9 +1,14 @@
+import 'package:ecommerce/core/di/service_locator.dart';
 import 'package:ecommerce/core/theming/colors_manager.dart';
+import 'package:ecommerce/core/utils/ui_utiles.dart';
 import 'package:ecommerce/core/utils/validator.dart';
 import 'package:ecommerce/core/widgets/default_elevated_button.dart';
 import 'package:ecommerce/core/widgets/default_text_form_field.dart';
+import 'package:ecommerce/features/auth/data/models/login_data.dart';
+import 'package:ecommerce/features/auth/presentation/auth_cubit/auth_cubit.dart';
 import 'package:ecommerce/features/auth/presentation/screens/register_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lottie/lottie.dart';
 
@@ -20,6 +25,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  final _authCubit = serviceLocator.get<AuthCubit>();
 
   @override
   Widget build(BuildContext context) {
@@ -121,9 +127,23 @@ class _LoginScreenState extends State<LoginScreen> {
                         ],
                       ),
                       SizedBox(height: 12.h),
-                      DefaultElevatedButton(
-                        onPressed: _login,
-                        label: 'Login',
+                      BlocListener<AuthCubit, AuthState>(
+                        bloc: _authCubit,
+                        listener: (_, state) {
+                          if (state is LoginSuccess) {
+                            UIUtils.hideLoading(context);
+                            Navigator.of(context).pushNamed('/home');
+                          } else if (state is LoginLoading) {
+                            UIUtils.showLoading(context);
+                          } else if (state is LoginFailed) {
+                            UIUtils.hideLoading(context);
+                            UIUtils.showMessage(state.message);
+                          }
+                        },
+                        child: DefaultElevatedButton(
+                          onPressed: _login,
+                          label: 'Login',
+                        ),
                       ),
                       SizedBox(height: 30.h),
                       Row(
@@ -158,6 +178,9 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _login() {
-    if (_formKey.currentState?.validate() == true) {}
+    if (_formKey.currentState?.validate() == true) {
+      _authCubit.login(LoginRequest(
+          email: _emailController.text, password: _passwordController.text));
+    }
   }
 }

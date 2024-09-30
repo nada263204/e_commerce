@@ -1,7 +1,12 @@
+import 'package:ecommerce/core/di/service_locator.dart';
+import 'package:ecommerce/core/utils/ui_utiles.dart';
 import 'package:ecommerce/core/utils/validator.dart';
 import 'package:ecommerce/core/widgets/default_elevated_button.dart';
 import 'package:ecommerce/core/widgets/default_text_form_field.dart';
+import 'package:ecommerce/features/auth/data/models/register_request.dart';
+import 'package:ecommerce/features/auth/presentation/auth_cubit/auth_cubit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lottie/lottie.dart';
 
@@ -20,6 +25,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  final _authCubit = serviceLocator.get<AuthCubit>();
 
   @override
   Widget build(BuildContext context) {
@@ -134,9 +140,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                     ),
                     SizedBox(height: 35.h),
-                    DefaultElevatedButton(
-                      onPressed: _register,
-                      label: 'Sign up',
+                    BlocListener<AuthCubit, AuthState>(
+                      bloc: _authCubit,
+                      listener: (_, state) {
+                        if (state is RegisterSuccess) {
+                          UIUtils.hideLoading(context);
+                          Navigator.of(context).pushNamed('/home');
+                        } else if (state is RegisterLoading) {
+                          UIUtils.showLoading(context);
+                        } else if (state is RegisterFailed) {
+                          UIUtils.hideLoading(context);
+                          UIUtils.showMessage(state.message);
+                        }
+                      },
+                      child: DefaultElevatedButton(
+                        onPressed: _register,
+                        label: 'Sign up',
+                      ),
                     ),
                   ],
                 ),
@@ -149,6 +169,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   void _register() {
-    if (_formKey.currentState?.validate() == true) {}
+    if (_formKey.currentState?.validate() == true) {
+      _authCubit.register(RegisterRequest(
+          name: _nameController.text,
+          email: _emailController.text,
+          password: _passwordController.text,
+          rePassword: _passwordController.text,
+          phone: _phoneController.text));
+    }
   }
 }
