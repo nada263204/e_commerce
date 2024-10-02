@@ -7,23 +7,26 @@ environment:
   sdk: ">=3.2.4 <4.0.0"
 
 dependencies:
+  cached_network_image: ^3.3.0
+  carousel_slider: ^5.0.0
   dartz: ^0.10.1
   dio: ^5.6.0
+  equatable: ^2.0.5
   flutter:
     sdk: flutter
   flutter_bloc: ^8.1.6
   flutter_screenutil: ^5.9.0
   fluttertoast: ^8.2.8
   get_it: ^7.2.0
-
+  hash_cached_image: ^0.0.2
   injectable: ^2.4.2
-
   lottie: ^3.1.2
+  readmore: ^3.0.0
   shared_preferences: ^2.2.2
 
 dev_dependencies:
-  flutter_lints: ^2.0.0
   build_runner: ^2.4.9
+  flutter_lints: ^2.0.0
   injectable_generator: ^2.6.1
 
 flutter:
